@@ -1,10 +1,11 @@
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Modal } from 'bootstrap'
 
 const BASE_URL =import.meta.env.VITE_BASE_URL
 const API_PATH = import.meta.env.VITE_API_PATH
 function App() {
-
+  //useState
   const [ isLoggedIn, setIsLoggedIn] = useState(false);
   // const [tempProduct, setTempProduct] = useState({});
   const [products, setProducts] = useState([]);
@@ -12,7 +13,9 @@ function App() {
     username: "example@test.com",
     password: "example"
   });
- 
+ //useRef
+  
+
   const inputChangeHandler = (e)=>{
     const {value,name}=e.target
     setAccount({
@@ -63,9 +66,22 @@ function App() {
       "$1",
     );
     axios.defaults.headers.common['Authorization'] =token ;
+    
     checkUserState();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
+
+//modal 控制
+  const modalLink = useRef(null)
+  const myModal = useRef(null)
+  const turnOnModal= () =>{
+    myModal.current.show();
+  }
+  useEffect(()=>{
+    myModal.current = new Modal (modalLink.current);
+  },[])
+
+
 
   return (
   <>
@@ -97,7 +113,9 @@ function App() {
                       <td>{product.price}</td>
                       <td>{product.is_enabled ? '啟用':'未啟用'}</td>
                       <td>
-                        <button type='button' className='btn btn-outline-primary '>編輯</button>
+                        <button type='button' className='btn btn-outline-primary ' onClick={()=>{
+                          turnOnModal();
+                        }}>編輯</button>
                         <button type='button' className='btn btn-outline-danger' onClick={()=>{
                           removeProduct(product.id)
                         }}>刪除</button>
@@ -127,7 +145,7 @@ function App() {
     </div>}
   
     <div
-          id="productModal"
+          ref={modalLink}
           className="modal fade"
           tabIndex="-1"
           aria-labelledby="productModalLabel"
