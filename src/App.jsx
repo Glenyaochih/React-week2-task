@@ -4,10 +4,23 @@ import { Modal } from 'bootstrap'
 
 const BASE_URL =import.meta.env.VITE_BASE_URL
 const API_PATH = import.meta.env.VITE_API_PATH
+const defaultModalState = {
+  imageUrl: "",
+  title: "",
+  category: "",
+  unit: "",
+  origin_price: "",
+  price: "",
+  description: "",
+  content: "",
+  is_enabled: 0,
+  imagesUrl: [""]
+};
+
+
 function App() {
   //useState
   const [ isLoggedIn, setIsLoggedIn] = useState(false);
-  // const [tempProduct, setTempProduct] = useState({});
   const [products, setProducts] = useState([]);
   const [account , setAccount] = useState({
     username: "example@test.com",
@@ -15,7 +28,6 @@ function App() {
   });
  //useRef
   
-
   const inputChangeHandler = (e)=>{
     const {value,name}=e.target
     setAccount({
@@ -46,8 +58,7 @@ function App() {
       alert('ಥ_ಥ ᖗ', error)
     }
   }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   async function checkUserState() {
     try {
       await axios.post(`${BASE_URL}/v2/api/user/check`);
@@ -58,15 +69,13 @@ function App() {
     }
   }
   
-
-
+  //
   useEffect(()=>{
     const token = document.cookie.replace(
       /(?:(?:^|.*;\s*)glenToken\s*=\s*([^;]*).*$)|^.*$/,
       "$1",
     );
     axios.defaults.headers.common['Authorization'] =token ;
-    
     checkUserState();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
@@ -74,15 +83,39 @@ function App() {
 //modal 控制
   const modalLink = useRef(null)
   const myModal = useRef(null)
-  const turnOnModal= () =>{
+  const [modalType, setModalType] = useState(null)
+
+  const turnOnModal= (type, product) =>{
+    switch (type) {
+      case 'create':
+        setTempProduct(defaultModalState)
+        break;
+      case 'edit':
+        setTempProduct(product)
+        break;
+      default:
+        break;
+    }
+    setModalType(type)
     myModal.current.show();
   }
+
   useEffect(()=>{
-    myModal.current = new Modal (modalLink.current);
+    myModal.current = new Modal (modalLink.current,{backdrop : false});
   },[])
 
 
 
+
+  const [tempProduct, setTempProduct] = useState(defaultModalState);
+  const handleModalInputChange = (e)=>{
+    const {value,name,checked,type} = e.target;
+    setTempProduct({
+      ...tempProduct,
+      [name]:type === 'checkbox' ? checked : value
+    })
+  }
+  
   return (
   <>
     {isLoggedIn ? <div className="container">
@@ -90,7 +123,9 @@ function App() {
             <div className="col">
               <div className='d-flex'>
                 <h2>產品列表</h2>
-                <button type='button' className='btn btn-primary ms-auto' >新增產品</button>
+                <button type='button' className='btn btn-primary ms-auto' onClick={()=>{
+                  turnOnModal('create');
+                }}>新增產品</button>
               </div>
               
               <table className="table table-Secondary table-hover">
@@ -113,8 +148,8 @@ function App() {
                       <td>{product.price}</td>
                       <td>{product.is_enabled ? '啟用':'未啟用'}</td>
                       <td>
-                        <button type='button' className='btn btn-outline-primary ' onClick={()=>{
-                          turnOnModal();
+                        <button type='button' className='btn btn-outline-primary me-2 ' onClick={()=>{
+                          turnOnModal('edit',product);
                         }}>編輯</button>
                         <button type='button' className='btn btn-outline-danger' onClick={()=>{
                           removeProduct(product.id)
@@ -151,15 +186,15 @@ function App() {
           aria-labelledby="productModalLabel"
           aria-hidden="true"
           >
-          <div className="modal-dialog modal-xl">
+          <div className="modal-dialog modal-xl modal-dialog-scrollable">
             <div className="modal-content border-0">
               <div className="modal-header bg-dark text-white">
                 <h5 id="productModalLabel" className="modal-title">
-                  <span>新增產品</span>
+                  <span>{modalType === 'create' ? '新增產品':'編輯產品'}</span>
                 </h5>
                 <button
                   type="button"
-                  className="btn-close"
+                  className="btn btn-primary btn-close"
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   ></button>
@@ -169,16 +204,39 @@ function App() {
                   <div className="col-sm-4">
                     <div className="mb-2">
                       <div className="mb-3">
+                        <h5>主圖</h5>
                         <label htmlFor="imageUrl" className="form-label">
                           輸入圖片網址
                         </label>
                         <input
+                          value={tempProduct.imageUrl}
+                          onChange={handleModalInputChange}
+                          name='imageUrl'
                           type="text"
                           className="form-control"
                           placeholder="請輸入圖片連結"
                           />
                       </div>
-                      <img className="img-fluid" src="" alt="" />
+                      <img className="img-fluid" src={tempProduct.imageUrl} alt="" />
+                      <div className="mb-3">
+                      <h5>副圖</h5>
+                        <label htmlFor="imagesUrl" className="form-label">
+                          輸入圖片網址
+                        </label>
+                        <input
+                          value={tempProduct.imagesUrl}
+                          onChange={handleModalInputChange}
+                          name='imagesUrl'
+                          type="text"
+                          className="form-control"
+                          placeholder="請輸入圖片連結"
+                          />
+                      </div>
+                      {
+                        tempProduct.imagesUrl.map((img)=>{
+                          return <img key={img}className="img-fluid" src={img} alt="" />
+                        })
+                      }
                     </div>
                     <div>
                       <button className="btn btn-outline-primary btn-sm d-block w-100">
@@ -193,8 +251,11 @@ function App() {
                   </div>
                   <div className="col-sm-8">
                     <div className="mb-3">
-                      <label htmlFor="title" className="form-label">標題</label>
+                      <label htmlFor="title" className="form-label h5">標題</label>
                       <input
+                        value={tempProduct.title}
+                        onChange={handleModalInputChange}
+                        name='title'
                         id="title"
                         type="text"
                         className="form-control"
@@ -204,8 +265,11 @@ function App() {
 
                     <div className="row">
                       <div className="mb-3 col-md-6">
-                        <label htmlFor="category" className="form-label">分類</label>
+                        <label htmlFor="category" className="form-label h5">分類</label>
                         <input
+                          value={tempProduct.category}
+                          onChange={handleModalInputChange}
+                          name='category'
                           id="category"
                           type="text"
                           className="form-control"
@@ -213,8 +277,11 @@ function App() {
                           />
                       </div>
                       <div className="mb-3 col-md-6">
-                        <label htmlFor="unit" className="form-label">單位</label>
+                        <label htmlFor="unit" className="form-label h5">單位</label>
                         <input
+                          value={tempProduct.unit}
+                          onChange={handleModalInputChange}
+                          name='unit'
                           id="unit"
                           type="text"
                           className="form-control"
@@ -225,8 +292,11 @@ function App() {
 
                     <div className="row">
                       <div className="mb-3 col-md-6">
-                        <label htmlFor="origin_price" className="form-label">原價</label>
+                        <label htmlFor="origin_price" className="form-label h5">原價</label>
                         <input
+                          value={tempProduct.origin_price}
+                          onChange={handleModalInputChange}
+                          name='origin_price'
                           id="origin_price"
                           type="number"
                           min="0"
@@ -235,8 +305,11 @@ function App() {
                           />
                       </div>
                       <div className="mb-3 col-md-6">
-                        <label htmlFor="price" className="form-label">售價</label>
+                        <label htmlFor="price" className="form-label h5">售價</label>
                         <input
+                          value={tempProduct.price}
+                          onChange={handleModalInputChange}
+                          name='price'
                           id="price"
                           type="number"
                           min="0"
@@ -248,16 +321,22 @@ function App() {
                     <hr />
 
                     <div className="mb-3">
-                      <label htmlFor="description" className="form-label">產品描述</label>
+                      <label htmlFor="description" className="form-label h5">產品描述</label>
                       <textarea
+                        value={tempProduct.description}
+                        onChange={handleModalInputChange}
+                        name='description'
                         id="description"
                         className="form-control"
                         placeholder="請輸入產品描述"
                         ></textarea>
                     </div>
                     <div className="mb-3">
-                      <label htmlFor="content" className="form-label">說明內容</label>
+                      <label htmlFor="content" className="form-label h5">說明內容</label>
                       <textarea
+                        value={tempProduct.content}
+                        onChange={handleModalInputChange}
+                        name='content'
                         id="content"
                         className="form-control"
                         placeholder="請輸入說明內容"
@@ -266,6 +345,9 @@ function App() {
                     <div className="mb-3">
                       <div className="form-check">
                         <input
+                          checked={tempProduct.is_enabled}
+                          onChange={handleModalInputChange}
+                          name='is_enabled'
                           id="is_enabled"
                           className="form-check-input"
                           type="checkbox"
