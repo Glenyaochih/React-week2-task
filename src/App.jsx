@@ -246,7 +246,7 @@ function App() {
                   {
                   products.map((product) => {
                     return (<tr key={product.id}>
-                      <th scope="row">{product.itemNum}</th>
+                      <th scope="row">{product.category}</th>
                       <td>{product.title}</td>
                       <td>{product.origin_price}</td>
                       <td>{product.price}</td>
@@ -289,6 +289,7 @@ function App() {
           tabIndex="-1"
           aria-labelledby="productModalLabel"
           aria-hidden="true"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           >
           <div className="modal-dialog modal-xl modal-dialog-scrollable">
             <div className="modal-content border-0">
