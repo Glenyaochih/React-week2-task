@@ -26,7 +26,7 @@ function App() {
     username: "example@test.com",
     password: "example"
   });
- //useRef
+
   
   const inputChangeHandler = (e)=>{
     const {value,name}=e.target
@@ -51,9 +51,11 @@ function App() {
       setProducts(getProducts.data.products)//發送請求取得資料
   }
   
-  const removeProduct = async (id)=>{
+  const removeProduct = async ()=>{
     try {
-      await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/admin/product/${id}`)
+      await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/admin/product/${tempProduct.id}`)
+      getProductData();
+      alert('已刪除成功')
     } catch (error) {
       alert('ಥ_ಥ ᖗ', error)
     }
@@ -69,6 +71,7 @@ function App() {
     }
   }
   
+  
   //
   useEffect(()=>{
     const token = document.cookie.replace(
@@ -80,7 +83,10 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
+
 //modal 控制
+  const delModalLink =useRef(null)
+  const delModal = useRef(null)
   const modalLink = useRef(null)
   const myModal = useRef(null)
   const [modalType, setModalType] = useState(null)
@@ -100,8 +106,20 @@ function App() {
     myModal.current.show();
   }
 
+  const turnoffModal =()=>{
+    myModal.current.hide();
+  }
+  const turnonDelModal =(product)=>{
+    setTempProduct(product)
+    delModal.current.show();
+  }
+  const turnoffDelModal =()=>{
+    delModal.current.hide();
+  }
+
   useEffect(()=>{
     myModal.current = new Modal (modalLink.current,{backdrop : false});
+    delModal.current = new Modal (delModalLink.current,{backdrop : false});
   },[])
 
 
@@ -115,7 +133,93 @@ function App() {
       [name]:type === 'checkbox' ? checked : value
     })
   }
+
+  const handleImageChange = (e,index)=>{
+    const {value} = e.target;
+    const newImages = [...tempProduct.imagesUrl]
+    
+    newImages[index]=value
+    setTempProduct({
+      ...tempProduct,
+      imagesUrl:newImages
+    })
+  }
+
+  const addImageHandler = ()=>{
+    const newImages = [...tempProduct.imagesUrl,'']
+    setTempProduct({
+      ...tempProduct,
+      imagesUrl:newImages
+    })
+  }
+  const removeImageHandler = ()=>{
+    const newImages = [...tempProduct.imagesUrl]
+      newImages.pop()
+    setTempProduct({
+      ...tempProduct,
+      imagesUrl:newImages
+    })
+  }
   
+  const insertProduct = async () => {
+    try {
+      await axios.post(`${BASE_URL}/v2/api/${API_PATH}/admin/product`,{
+        data:{
+          ...tempProduct,
+          origin_price:Number(tempProduct.origin_price),
+          price:Number(tempProduct.price),
+          is_enabled:tempProduct.is_enabled ? 1 : 0
+        }
+      })
+      alert('新增成功')
+    } catch (error) {
+      alert('新增失敗',error)
+    }
+  }
+
+  const editProduct = async () => {
+    try {
+      await axios.put(`${BASE_URL}/v2/api/${API_PATH}/admin/product/${tempProduct.id}`,{
+        data:{
+          ...tempProduct,
+          origin_price:Number(tempProduct.origin_price),
+          price:Number(tempProduct.price),
+          is_enabled:tempProduct.is_enabled ? 1 : 0
+        }
+      })
+      alert('修改成功')
+    } catch (error) {
+      alert('修改失敗',error)
+    }
+  }
+
+
+  const updateProductConfirm = async()=>{
+    const apiSwitch = modalType === 'create'? insertProduct : editProduct
+    try {
+      console.log(apiSwitch)
+      await apiSwitch();
+      getProductData();
+      turnoffModal();
+
+    } catch (error) {
+      alert('新增產品失敗')
+      console.log(error);
+    }
+  }
+
+  const delProductConfirm = async()=>{
+    try {
+      await  removeProduct();
+      getProductData();
+      turnoffDelModal();
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  console.log(tempProduct)
+
   return (
   <>
     {isLoggedIn ? <div className="container">
@@ -142,17 +246,17 @@ function App() {
                   {
                   products.map((product) => {
                     return (<tr key={product.id}>
-                      <th scope="row">{product.itemNum}</th>
+                      <th scope="row">{product.category}</th>
                       <td>{product.title}</td>
                       <td>{product.origin_price}</td>
                       <td>{product.price}</td>
-                      <td>{product.is_enabled ? '啟用':'未啟用'}</td>
+                      <td>{product.is_enabled ? <span className='text-success'>啟用</span> :'未啟用'}</td>
                       <td>
                         <button type='button' className='btn btn-outline-primary me-2 ' onClick={()=>{
                           turnOnModal('edit',product);
                         }}>編輯</button>
                         <button type='button' className='btn btn-outline-danger' onClick={()=>{
-                          removeProduct(product.id)
+                          turnonDelModal(product);
                         }}>刪除</button>
                       </td>
                     </tr>)
@@ -185,6 +289,7 @@ function App() {
           tabIndex="-1"
           aria-labelledby="productModalLabel"
           aria-hidden="true"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           >
           <div className="modal-dialog modal-xl modal-dialog-scrollable">
             <div className="modal-content border-0">
@@ -219,35 +324,52 @@ function App() {
                       </div>
                       <img className="img-fluid" src={tempProduct.imageUrl} alt="" />
                       <div className="mb-3">
-                      <h5>副圖</h5>
-                        <label htmlFor="imagesUrl" className="form-label">
-                          輸入圖片網址
-                        </label>
-                        <input
-                          value={tempProduct.imagesUrl}
-                          onChange={handleModalInputChange}
-                          name='imagesUrl'
-                          type="text"
-                          className="form-control"
-                          placeholder="請輸入圖片連結"
-                          />
+                        <h5>副圖</h5>
+                        <div className="border border-2 border-dashed rounded-3 p-3">
+                          {tempProduct.imagesUrl?.map((image, index) => (
+                            <div key={index} className="mb-2">
+                              <label
+                                htmlFor={`imagesUrl-${index + 1}`}
+                                className="form-label"
+                              >
+                                副圖 {index + 1}
+                              </label>
+                              <input
+                                value={image}
+                                onChange={(e)=> handleImageChange(e,index)}
+                                id={`imagesUrl-${index + 1}`}
+                                type="text"
+                                placeholder={`圖片網址 ${index + 1}`}
+                                className="form-control mb-2"
+                              />
+                              {image && (
+                                <img
+                                  src={image}
+                                  alt={`副圖 ${index + 1}`}
+                                  className="img-fluid mb-2"
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      {
-                        tempProduct.imagesUrl.map((img)=>{
-                          return <img key={img}className="img-fluid" src={img} alt="" />
-                        })
-                      }
                     </div>
-                    <div>
-                      <button className="btn btn-outline-primary btn-sm d-block w-100">
-                        新增圖片
-                      </button>
-                    </div>
-                    <div>
-                      <button className="btn btn-outline-danger btn-sm d-block w-100">
-                        刪除圖片
-                      </button>
-                    </div>
+                    <div className='btn-group w-100'>
+                        {tempProduct.imagesUrl.length < 5 &&
+                        tempProduct.imagesUrl[tempProduct.imagesUrl.length -1 ]!== '' &&(
+                        <button 
+                        className="btn btn-outline-primary btn-sm d-blocks"
+                        onClick={addImageHandler}
+                        >新增圖片
+                        </button>)
+                        }
+                        {tempProduct.imagesUrl.length > 1 &&(
+                          <button 
+                          className="btn btn-outline-danger btn-sm d-block"
+                          onClick={removeImageHandler}
+                          >刪除圖片
+                        </button>)}
+                      </div>
                   </div>
                   <div className="col-sm-8">
                     <div className="mb-3">
@@ -368,11 +490,52 @@ function App() {
                   >
                   取消
                 </button>
-                <button type="button" className="btn btn-primary">確認</button>
+                <button type="button" className="btn btn-primary" onClick={ updateProductConfirm}>確認</button>
               </div>
             </div>
           </div>
+    </div>
+
+    <div
+      ref={delModalLink}
+      className="modal fade"
+      id="delProductModal"
+      tabIndex="-1"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+    >
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h1 className="modal-title fs-5">刪除產品</h1>
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div className="modal-body">
+            你是否要刪除 
+            <span className="text-danger fw-bold">{tempProduct.title}</span>
+          </div>
+          <div className="modal-footer">
+            <button
+              onClick={turnoffDelModal}
+              type="button"
+              className="btn btn-secondary"
+            >
+              取消
+            </button>
+            <button 
+            type="button" 
+            className="btn btn-danger"
+            onClick={delProductConfirm}
+            >刪除
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
   </>
   )
 }
