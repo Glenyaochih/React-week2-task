@@ -2,6 +2,8 @@ import axios from 'axios'
 import { useEffect, useRef, useState } from 'react'
 import { Modal } from 'bootstrap'
 
+
+
 const BASE_URL =import.meta.env.VITE_BASE_URL
 const API_PATH = import.meta.env.VITE_API_PATH
 const defaultModalState = {
@@ -22,6 +24,7 @@ function App() {
   //useState
   const [ isLoggedIn, setIsLoggedIn] = useState(false);
   const [products, setProducts] = useState([]);
+
   const [account , setAccount] = useState({
     username: "example@test.com",
     password: "example"
@@ -46,9 +49,14 @@ function App() {
     }catch(error){alert('登入失敗',error)}
   }
 
-  const getProductData = async ()=>{
-    const getProducts = await axios.get(`${BASE_URL}/v2/api/${API_PATH}/admin/products`)
-      setProducts(getProducts.data.products)//發送請求取得資料
+  const getProductData = async (page)=>{
+    try{
+      const getProducts = await axios.get(`${BASE_URL}/v2/api/${API_PATH}/admin/products?page=${page}`)
+        setProducts(getProducts.data.products)//發送請求取得資料
+        setPageState(getProducts.data.pagination)
+    }catch{
+      console.log('取得產品失敗')
+    }
   }
   
   const removeProduct = async ()=>{
@@ -70,7 +78,6 @@ function App() {
       alert(error);
     }
   }
-  
   
   //
   useEffect(()=>{
@@ -197,7 +204,6 @@ function App() {
   const updateProductConfirm = async()=>{
     const apiSwitch = modalType === 'create'? insertProduct : editProduct
     try {
-      console.log(apiSwitch)
       await apiSwitch();
       getProductData();
       turnoffModal();
@@ -217,8 +223,12 @@ function App() {
       alert(error)
     }
   }
-
-  console.log(tempProduct)
+  const [pageState, setPageState]=useState({})
+  const pageHandler=(page)=>{
+    getProductData(page)
+    }
+  
+  
 
   return (
   <>
@@ -266,6 +276,40 @@ function App() {
               </table>
             </div>
           </div>
+          <div className="d-flex justify-content-center">
+            <nav>
+              <ul className="pagination">
+                <li className={`page-item ${!pageState.has_pre && 'disabled'}`}>
+                  <a 
+                  onClick={()=>pageHandler(pageState.current_page - 1)}
+                  className="page-link" href="#">
+                    上一頁
+                  </a>
+                </li>
+                
+                {Array.from({length:pageState.total_pages}).map((_,index)=>{
+                  return <li 
+                  key={index}
+                  className={`page-item ${pageState.current_page === index+1 && 'active'}`}>
+                  <a
+                  onClick={()=>{pageHandler(index+1)}} 
+                  className="page-link" href="#">
+                    {index+1}
+                  </a>
+                </li>
+                })}
+                
+                <li className={`page-item ${!pageState.has_next && 'disabled'}`}>
+                  <a 
+                  onClick={()=>pageHandler(pageState.current_page + 1)}
+                  className="page-link" href="#">
+                    下一頁
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
     </div> 
     : <div className="d-flex flex-column justify-content-center align-items-center vh-100">
     <h1 className="mb-5">請先登入</h1>
@@ -495,6 +539,7 @@ function App() {
             </div>
           </div>
     </div>
+    
 
     <div
       ref={delModalLink}
