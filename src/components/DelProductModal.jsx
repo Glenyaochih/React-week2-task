@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import axios from 'axios'
-import {useRef ,useEffect} from 'react'
+import {useRef ,useEffect, useState} from 'react'
 import { Modal } from 'bootstrap'
+
 const BASE_URL =import.meta.env.VITE_BASE_URL
 const API_PATH = import.meta.env.VITE_API_PATH
 
@@ -13,6 +14,13 @@ function DelProductModal({
     isOpen,
     setIsOpen}) {
     
+    const [delModalData ,setDelModalData]=useState(tempProduct)
+    useEffect(()=>{
+        setDelModalData({
+          ...tempProduct
+        })
+    },[tempProduct])
+    console.log(delModalData)
     const delModalLink =useRef(null)
     const delModal = useRef(null)
 
@@ -22,6 +30,7 @@ function DelProductModal({
     useEffect(()=>{
       if(isOpen){
         delModal.current.show();
+        setIsOpen(true)
       }
     },[isOpen])
 
@@ -32,8 +41,8 @@ function DelProductModal({
 
     const removeProduct = async ()=>{
         try {
-          await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/admin/product/${tempProduct.id}`)
-          getProductData();
+          await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/admin/product/${delModalData.id}`)
+          console.log(delModalData)
           alert('已刪除成功')
         } catch (error) {
           alert('ಥ_ಥ ᖗ', error)
@@ -42,7 +51,7 @@ function DelProductModal({
 
       const delProductConfirm = async()=>{
         try {
-          await  removeProduct();
+          await removeProduct();
           getProductData();
           turnoffDelModal();
         } catch (error) {
@@ -75,7 +84,7 @@ function DelProductModal({
             </div>
             <div className="modal-body">
               你是否要刪除 
-              <span className="text-danger fw-bold">{tempProduct.title}</span>
+              <span className="text-danger fw-bold">{delModalData.title}</span>
             </div>
             <div className="modal-footer">
               <button
@@ -100,7 +109,7 @@ function DelProductModal({
 
 DelProductModal.propTypes = {
   modalType: PropTypes.string.isRequired,
-  isOpen: PropTypes.bool.isRequired,
+  isOpen: PropTypes.bool,
   setIsOpen:PropTypes.bool.isRequired,
   tempProduct: PropTypes.shape({
     id: PropTypes.string,

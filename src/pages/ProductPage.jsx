@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-
 import Pagination from '../components/Pagination'
 import ProductModal from '../components/productModal'
 import DelProductModal from '../components/DelProductModal'
@@ -26,13 +25,13 @@ imagesUrl: [""]
 
 function ProductPage() {
     
-    const [modalType, setModalType] = useState(null)
+    const [modalType, setModalType] = useState(null);
     const [tempProduct, setTempProduct] = useState(defaultModalState);
-    const [pageState, setPageState]=useState({})
+    const [pageState, setPageState]=useState({});
     const[products,setProducts] = useState([]);
-    const[isProductModalOpen,setIsProductModalOpen]=useState(false)
+    const[isProductModalOpen,setIsProductModalOpen]=useState(false);
     
-    const[isDelProductModalOpen,setIsDelProductModalOpen]=useState(false);
+    const[isDelProductModalOpen,setIsDelProductModalOpen]= useState(false);
     
     
     
@@ -51,7 +50,8 @@ function ProductPage() {
         setModalType(type)
         setIsProductModalOpen(true);
     }
-    const turnOnDelModal=()=>{
+    const turnOnDelModal=(product)=>{
+        setTempProduct(product)
         setIsDelProductModalOpen(true)
     }
 
