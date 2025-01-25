@@ -8,7 +8,7 @@ function App() {
   
   return (
   <>
-    {isLoggedIn ? <ProductPage isLoggedIn={isLoggedIn}/>
+    {isLoggedIn ? <ProductPage isLoggedIn={isLoggedIn}  setIsLoggedIn={setIsLoggedIn}/>
     :<LoginPage setIsLoggedIn={setIsLoggedIn}/> }
   </>
   )

@@ -17,7 +17,6 @@ function ProductModal ({
   setIsOpen,
   getProductData
 }) {
-
     const [modalData ,setModalData]= useState(tempProduct)
     useEffect(()=>{
       setModalData({
@@ -33,7 +32,6 @@ function ProductModal ({
   useEffect(()=>{
     if(isOpen){
       myModal.current.show();
-      
     }
   },[isOpen])
   
@@ -148,7 +146,6 @@ function ProductModal ({
         className="modal fade"
         tabIndex="-1"
         aria-labelledby="productModalLabel"
-        aria-hidden="true"
         style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         >
         <div className="modal-dialog modal-xl modal-dialog-scrollable">
@@ -368,7 +365,6 @@ function ProductModal ({
     </div>
     )
 }
-
 ProductModal.propTypes = {
   modalType: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,

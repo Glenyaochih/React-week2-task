@@ -1,8 +1,10 @@
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Pagination from '../components/Pagination'
 import ProductModal from '../components/productModal'
 import DelProductModal from '../components/DelProductModal'
+import { Offcanvas } from 'bootstrap'
+import { BiLogOut } from 'react-icons/bi'
 
 
 
@@ -23,9 +25,8 @@ is_enabled: 0,
 imagesUrl: [""]
 };
 
-function ProductPage() {
-    
-    const [modalType, setModalType] = useState(null);
+function ProductPage({setIsLoggedIn}) {
+    const [modalType, setModalType] = useState('');
     const [tempProduct, setTempProduct] = useState(defaultModalState);
     const [pageState, setPageState]=useState({});
     const[products,setProducts] = useState([]);
@@ -33,7 +34,15 @@ function ProductPage() {
     
     const[isDelProductModalOpen,setIsDelProductModalOpen]= useState(false);
     
-    
+    const loginOffcanvas = useRef(null)
+    const loginOffcanvasLink=useRef()
+    useEffect(()=>{
+        loginOffcanvas.current = new Offcanvas (loginOffcanvasLink.current)
+    })
+    const turnOnLoginOffcanvas = ()=>{
+        loginOffcanvas.current.show()
+    }
+
     
 
     const turnOnModal= (type, product) =>{
@@ -54,11 +63,6 @@ function ProductPage() {
         setTempProduct(product)
         setIsDelProductModalOpen(true)
     }
-
-    
-    
-    
-   
     
     const getProductData = async (page)=>{
         try{
@@ -69,6 +73,18 @@ function ProductPage() {
         console.log('取得產品失敗')
         }
     }
+
+
+    const logOutHandler = async ()=>{
+        try {
+            await axios.post(`${BASE_URL}/v2/logout`);
+            setIsLoggedIn(false)
+            alert('登出成功')
+        } catch (error) {
+            console.log(error,'登出失敗')
+        }
+    }
+
 
     useEffect(()=>{
         getProductData();
@@ -85,9 +101,19 @@ function ProductPage() {
                     <div className="col">
                     <div className='d-flex'>
                         <h2>產品列表</h2>
-                        <button type='button' className='btn btn-primary ms-auto' onClick={()=>{
+                        <button type='button' className='btn btn-primary ms-5' onClick={()=>{
                         turnOnModal('create');
                         }}>新增產品</button>
+                        <div className="d-flex ms-auto align-items-center">
+                            <div className="flex-shrink-0">
+                                <a href="#" onClick={turnOnLoginOffcanvas}>
+                                <img className="rounded-circle object-fit-cover" style={{height:40, width:40}} src='images/andychen.jpeg' alt="andy"/>
+                                </a>
+                            </div>
+                            <div className="ms-3">
+                            <h1 className="h6">Andy Chen</h1>
+                            </div>
+                        </div>
                     </div>
                     
                     <table className="table table-Secondary table-hover">
@@ -133,13 +159,33 @@ function ProductPage() {
                 getProductData={getProductData}
                 />}
         </div> 
+                {<DelProductModal 
+                getProductData={getProductData}
+                tempProduct={tempProduct}
+                isOpen={isDelProductModalOpen}
+                setIsOpen={setIsDelProductModalOpen}
+                />}
+                
 
-    {<DelProductModal 
-    getProductData={getProductData}
-    tempProduct={tempProduct}
-    isOpen={isDelProductModalOpen}
-    setIsOpen={setIsDelProductModalOpen}
-    />}
+                <div ref={loginOffcanvasLink} className="offcanvas offcanvas-end"  id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                    <div className="offcanvas-header">
+                        <h5 className="offcanvas-title" id="offcanvasRightLabel">管理者設定</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div className="offcanvas-body">
+                        <div>
+                            <small><a className=" text-secondary" href="mailto:andy0401@mail.com">andy0401@mail.com</a></small>
+                        </div>
+                        <div>
+                            <a className='btn' type='button' href="#">偏好設定</a>
+                        </div>
+                        <div className='mt-auto'>
+                            <button type='button' className='btn btn-outline-secondary w-100' onClick={
+                                logOutHandler
+                            }><BiLogOut size={32}/><span className='fs-5'>logout</span></button>
+                        </div>
+                    </div>
+                </div>
 
     </>)
 }

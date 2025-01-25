@@ -20,7 +20,6 @@ function DelProductModal({
           ...tempProduct
         })
     },[tempProduct])
-    console.log(delModalData)
     const delModalLink =useRef(null)
     const delModal = useRef(null)
 
