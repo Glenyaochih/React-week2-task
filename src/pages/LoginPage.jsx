@@ -1,10 +1,10 @@
+import PropTypes from 'prop-types';
 import axios from 'axios'
 import {useState,useEffect} from 'react'
 const BASE_URL =import.meta.env.VITE_BASE_URL
 
 
-function LoginPage({isLoggedIn,
-                    setIsLoggedIn}) {
+function LoginPage({setIsLoggedIn}) {
     
     const [account , setAccount] = useState({
         username: "example@test.com",
@@ -14,6 +14,8 @@ function LoginPage({isLoggedIn,
 
     const loginHandler = async (e)=>{
         try{
+          setIsLoggedIn(true);
+          console.log('已送出')
           e.preventDefault()
           const signinData =  await axios.post(`${BASE_URL}/v2/admin/signin`,account);
           const {token ,expired} = signinData.data;
@@ -31,15 +33,16 @@ function LoginPage({isLoggedIn,
     }
 
     const checkUserState=async()=> {
-        try {
-          await axios.post(`${BASE_URL}/v2/api/user/check`);
-          console.log('登入成功')
-          setIsLoggedIn(true);
-        } catch (error) {
-          console.log(error)
-          alert('請輸入登入資訊');
-        }
+      try {
+        console.log('確認完成')
+        await axios.post(`${BASE_URL}/v2/api/user/check`);
+        console.log('登入成功')
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.log(error)
+        alert('請輸入登入資訊');
       }
+    }
       
       //
       useEffect(()=>{
@@ -49,10 +52,9 @@ function LoginPage({isLoggedIn,
           "$1",
         );
         axios.defaults.headers.common['Authorization'] =token ;
-        checkUserState()
-        
+        checkUserState();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      },[isLoggedIn])
+      },[])
 
     return(
         <div className="d-flex flex-column justify-content-center align-items-center vh-100">
@@ -71,6 +73,9 @@ function LoginPage({isLoggedIn,
             <p className="mt-5 mb-3 text-muted">&copy; 2024~∞ - 六角學院</p>
         </div>
     )
+}
+LoginPage.protoType={
+  setIsLoggedIn:PropTypes.bool.isRequired
 }
 
 export default LoginPage

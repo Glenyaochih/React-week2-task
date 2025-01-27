@@ -73,6 +73,9 @@ function ProductPage({setIsLoggedIn}) {
         console.log('取得產品失敗')
         }
     }
+    useEffect(()=>{
+        getProductData();
+    },[])//要記得加依賴，不然頁面無法轉換，因為頁面使用useState更新資料畫面會一直更新，未加依賴也會一直更新
 
 
     const logOutHandler = async ()=>{
@@ -86,9 +89,6 @@ function ProductPage({setIsLoggedIn}) {
     }
 
 
-    useEffect(()=>{
-        getProductData();
-    },[])//要記得加依賴，不然頁面無法轉換，因為頁面使用useState更新資料畫面會一直更新，未加依賴也會一直更新
 
 
 
