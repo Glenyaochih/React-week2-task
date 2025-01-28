@@ -34,10 +34,7 @@ function LoginPage({setIsLoggedIn}) {
 
     const checkUserState=async()=> {
       try {
-        console.log('確認完成')
         await axios.post(`${BASE_URL}/v2/api/user/check`);
-        console.log('登入成功')
-        setIsLoggedIn(true);
       } catch (error) {
         console.log(error)
         alert('請輸入登入資訊');
@@ -46,14 +43,12 @@ function LoginPage({setIsLoggedIn}) {
       
       //
       useEffect(()=>{
-        console.log('已被觸發')
         const token = document.cookie.replace(
           /(?:(?:^|.*;\s*)glenToken\s*=\s*([^;]*).*$)|^.*$/,
           "$1",
         );
         axios.defaults.headers.common['Authorization'] =token ;
         checkUserState();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       },[])
 
     return(
@@ -74,7 +69,7 @@ function LoginPage({setIsLoggedIn}) {
         </div>
     )
 }
-LoginPage.protoType={
+LoginPage.propTypes={
   setIsLoggedIn:PropTypes.bool.isRequired
 }
 
