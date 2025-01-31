@@ -191,6 +191,6 @@ function ProductPage({setIsLoggedIn}) {
     </>)
 }
 ProductPage.propTypes ={
-    setIsLoggedIn:PropTypes.bool.isRequired
+    setIsLoggedIn:PropTypes.func.isRequired,
 }
 export default ProductPage

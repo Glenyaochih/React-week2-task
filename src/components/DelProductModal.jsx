@@ -12,7 +12,8 @@ function DelProductModal({
     getProductData,
     tempProduct,
     isOpen,
-    setIsOpen}) {
+    setIsOpen,
+  }) {
     
     const [delModalData ,setDelModalData]=useState(tempProduct)
     useEffect(()=>{
@@ -31,7 +32,7 @@ function DelProductModal({
         delModal.current.show();
         setIsOpen(true)
       }
-    },[isOpen])
+    },[isOpen, setIsOpen])
 
     const turnoffDelModal =()=>{
         delModal.current.hide();
@@ -107,10 +108,8 @@ function DelProductModal({
 }
 
 DelProductModal.propTypes = {
-  modalType: PropTypes.string.isRequired,
-  isOpen: PropTypes.bool,
-  setIsOpen:PropTypes.bool.isRequired,
-  tempProduct: PropTypes.shape({
+  getProductData:PropTypes.func.isRequired,
+  tempProduct:PropTypes.shape({
     id: PropTypes.string,
     imageUrl: PropTypes.string,
     title: PropTypes.string,
@@ -123,7 +122,9 @@ DelProductModal.propTypes = {
     isEnabled: PropTypes.bool,
     imagesUrl: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
-  getProductData: PropTypes.func.isRequired,
+  isOpen:PropTypes.bool.isRequired,
+  setIsOpen:PropTypes.func.isRequired
+
 };
 
 export default DelProductModal;

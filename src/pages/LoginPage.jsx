@@ -5,7 +5,6 @@ const BASE_URL =import.meta.env.VITE_BASE_URL
 
 
 function LoginPage({setIsLoggedIn}) {
-    
     const [account , setAccount] = useState({
         username: "example@test.com",
         password: "example"
@@ -14,14 +13,15 @@ function LoginPage({setIsLoggedIn}) {
 
     const loginHandler = async (e)=>{
         try{
-          setIsLoggedIn(true);
-          console.log('已送出')
           e.preventDefault()
           const signinData =  await axios.post(`${BASE_URL}/v2/admin/signin`,account);
           const {token ,expired} = signinData.data;
           document.cookie = `glenToken=${token}; expires=${new Date(expired)}`;
           axios.defaults.headers.common['Authorization'] = token;//發送get請求時需發送這一行將token 帶入驗證
-        }catch(error){alert('登入失敗',error)}
+          setIsLoggedIn(true);
+          alert(signinData.data.message)
+        }catch(error){
+          alert(error.response.data.message)}
     }
 
     const inputChangeHandler = (e)=>{
@@ -35,9 +35,10 @@ function LoginPage({setIsLoggedIn}) {
     const checkUserState=async()=> {
       try {
         await axios.post(`${BASE_URL}/v2/api/user/check`);
+        setIsLoggedIn(true);
       } catch (error) {
         console.log(error)
-        alert('請輸入登入資訊');
+        alert(error.response.data.message);
       }
     }
       
@@ -70,7 +71,7 @@ function LoginPage({setIsLoggedIn}) {
     )
 }
 LoginPage.propTypes={
-  setIsLoggedIn:PropTypes.bool.isRequired
+  setIsLoggedIn:PropTypes.func.isRequired,
 }
 
 export default LoginPage

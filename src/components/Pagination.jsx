@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function Pagination({getProductData,pageState}) {
     const pageHandler=(page)=>{
         getProductData(page)
@@ -10,7 +12,10 @@ function Pagination({getProductData,pageState}) {
                     <ul className="pagination">
                         <li className={`page-item ${!pageState.has_pre && 'disabled'}`}>
                         <a 
-                        onClick={()=>pageHandler(pageState.current_page - 1)}
+                        onClick={(e)=>{
+                            e.preventDefault();
+                            pageHandler(pageState.current_page - 1)
+                        }}
                         className="page-link" href="#">
                             上一頁
                         </a>
@@ -21,7 +26,10 @@ function Pagination({getProductData,pageState}) {
                         key={index}
                         className={`page-item ${pageState.current_page === index+1 && 'active'}`}>
                         <a
-                        onClick={()=>{pageHandler(index+1)}} 
+                        onClick={(e)=>{
+                            e.preventDefault();
+                            pageHandler(index+1)
+                        }} 
                         className="page-link" href="#">
                             {index+1}
                         </a>
@@ -30,7 +38,10 @@ function Pagination({getProductData,pageState}) {
                         
                         <li className={`page-item ${!pageState.has_next && 'disabled'}`}>
                         <a 
-                        onClick={()=>pageHandler(pageState.current_page + 1)}
+                        onClick={(e)=>{
+                            e.preventDefault();
+                            pageHandler(pageState.current_page + 1)
+                        }}
                         className="page-link" href="#">
                             下一頁
                         </a>
@@ -43,5 +54,8 @@ function Pagination({getProductData,pageState}) {
 
 
 }
-
+Pagination.propTypes = {
+    getProductData:PropTypes.func.isRequired,
+    pageState:PropTypes.object.isRequired,
+};
 export default Pagination;

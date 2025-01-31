@@ -85,9 +85,9 @@ function ProductModal ({
               is_enabled:modalData.is_enabled ? 1 : 0
             }
           })
-          alert('新增成功')
+         
         } catch (error) {
-          alert('新增失敗',error)
+          alert(error.data.message)
         }
       }
 
@@ -103,7 +103,7 @@ function ProductModal ({
           })
           alert('修改成功')
         } catch (error) {
-          alert('修改失敗',error)
+          alert(error.data.message)
         }
       }
 
@@ -145,7 +145,6 @@ function ProductModal ({
         ref={modalLink}
         className="modal fade"
         tabIndex="-1"
-        aria-labelledby="productModalLabel"
         style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         >
         <div className="modal-dialog modal-xl modal-dialog-scrollable">
@@ -368,7 +367,7 @@ function ProductModal ({
 ProductModal.propTypes = {
   modalType: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  setIsOpen:PropTypes.bool.isRequired,
+  setIsOpen:PropTypes.func.isRequired,
   tempProduct: PropTypes.shape({
     id: PropTypes.string,
     imageUrl: PropTypes.string,
