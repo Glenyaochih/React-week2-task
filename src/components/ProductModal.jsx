@@ -88,7 +88,6 @@ function ProductModal({
     } catch (error) {
       dispatch(createAsyncMessage(error.response.data))
       console.log(error.response.data)
-      setIsOpen(error.response.data.success);
     }
   };
 
